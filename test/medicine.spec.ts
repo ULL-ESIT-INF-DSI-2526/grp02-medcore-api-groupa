@@ -15,7 +15,7 @@ describe("Test medications", () => {
         ingestionMethod: "oral",
         stock: 100,
         price: 5.99,
-        preescriptionRequired: false,
+        prescriptionRequired: false,
         expirationDate: new Date("2025-12-31"),
         contraindications: ["Liver disease", "Allergy to paracetamol"]
     };
@@ -42,7 +42,7 @@ describe("Test medications", () => {
                 ingestionMethod: "oral",
                 stock: 50,
                 price: 3.99,
-                preescriptionRequired: false,
+                prescriptionRequired: false,
                 expirationDate: new Date("2024-12-31"),
                 contraindications: ["Stomach ulcers", "Allergy to ibuprofen"]
             })
@@ -193,6 +193,53 @@ describe("Test medications", () => {
             .delete("/medications?name=Paracetamol")
             .expect(500);
             await moongose.connect("mongodb://localhost:27017/hospital-app");
+        });
+    });
+
+    describe("PATCH /medications/:id", () => {
+        test("Debe actualizar un medicamento por su id", async () => {
+            await request(app)
+            .patch(`/medications/${idMedicine}`)
+            .send({
+                name: "Paracetamol Modificado"
+            })
+            .expect(200);
+            const medicine = await Medicine.findById(idMedicine);
+            expect(medicine?.name).toBe("Paracetamol Modificado");
+        });
+
+        test("Debe dar error si el medicamento no existe", async () => {
+            await request(app)
+            .patch("/medications/69f4f553fcd85dd7d524d54b")
+            .send({
+                name: "Medicamento Inexistente"
+            })
+            .expect(404);
+        });
+
+        test("Debe dar error si el id no es válido", async () => {
+            await request(app)
+            .patch("/medications/invalid-id")
+            .send({
+                name: "Medicamento Inexistente"
+            })
+            .expect(500);
+        });
+
+        test ("Debe dar error si no se introducen datos para actualizar", async () => {
+            await request(app)
+            .patch(`/medications/${idMedicine}`)
+            .send()
+            .expect(400);
+        });
+        
+        test("Debe dar error si se intenta actualizar con datos no válidos", async () => {
+            await request(app)
+            .patch(`/medications/${idMedicine}`)
+            .send({
+                hola: "Mundo"
+            })
+            .expect(400);
         });
     });
 });

@@ -47,6 +47,8 @@ patientRouter.get('/patients', async(req, res) => {
     }
 });
 
+
+
 patientRouter.delete('/patients/:id', async(req, res) => {
     try {
         const patient = await Patient.findByIdAndDelete(req.params.id);
@@ -79,5 +81,35 @@ patientRouter.delete('/patients', async(req, res) => {
         res.send(result);
     } catch (error) {
         res.status(500).send(error);
+    }
+});
+
+patientRouter.patch('/patients/:id', async (req, res) => {
+    if (!req.body) {
+        res.status(400).send({
+            error: 'Should provide at least one field to update'
+        });
+    } else {
+        const actualUpdates = Object.keys(req.body);
+        const allowedUpdates = ['name', 'birthDate', 'gender', 'contactInformation', 'alergies', 'bloodType', 'status'];
+        const validUpdate = actualUpdates.every((u) => allowedUpdates.includes(u));
+        if (!validUpdate) {
+            res.status(400).send({
+                error: `Only the following fields can be updated: ${allowedUpdates.join(', ')}`
+            });
+        } else {
+            try {
+                const patient = await Patient.findByIdAndUpdate( req.params.id, req.body, {new: true, runValidators: true});
+                if (!patient) {
+                    res.status(404).send({
+                        error: 'Patient not found'
+                    });
+                } else {
+                    res.status(200).send(patient);
+                }
+            } catch (err) {
+                res.status(500).send(err);
+            }
+        }
     }
 });

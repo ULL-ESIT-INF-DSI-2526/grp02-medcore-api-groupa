@@ -27,6 +27,15 @@ const patientSchema = new Schema<PatientDocumentInterface>({
     },
 
     /**
+     * Edad del paciente, calculada a partir de la fecha de nacimiento.
+     */
+    age: {
+        type: Number,
+        required: false,
+        min: 0
+    },
+
+    /**
      * Numero de identificación del paciente (DNI o pasaporte).
      * 
      * Se establece una longitud mínima de 9 caracteres para asegurar que el número de identificación sea válido (Tamaño de DNI).
@@ -113,6 +122,7 @@ const patientSchema = new Schema<PatientDocumentInterface>({
         email: {
             type: String,
             trim: true,
+            unique: true,
             validate: {
                 validator: (value: string) => validator.isEmail(value),
                 message: 'Invalid email format'
@@ -162,6 +172,14 @@ const patientSchema = new Schema<PatientDocumentInterface>({
             'sick leave' 
         ]
     }
+});
+
+patientSchema.pre('save', async function (this: PatientDocumentInterface) {
+    const realage = new Date().getFullYear() - this.birthDate.getFullYear();
+    if (realage < 0) {
+        throw new Error('Birth date cannot be in the future');
+    }
+    this.age = realage;
 });
 
 /**

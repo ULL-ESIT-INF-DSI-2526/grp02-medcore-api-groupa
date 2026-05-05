@@ -146,7 +146,7 @@ const medicineSchema = new Schema<MedicineDocumentInterface>({
     /**
      * Indica si el medicamento requiere receta médica.
      */
-    preescriptionRequired: {
+    prescriptionRequired: {
         type: Boolean,
         required: true
     },

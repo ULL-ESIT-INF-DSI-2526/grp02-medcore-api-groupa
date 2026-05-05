@@ -1,5 +1,11 @@
 import { Document } from "mongoose";
 
+type MedicalSpeciality = 'General Medicine' | 'Cardiology' | 'Traumatology' | 'Pediatry' | 'Oncology' | 'Urgency';
+
+type Title = 'Attending Physician' | 'Resident Physician' | 'Nurse' | 'Nursing Assistant' | 'Chief of Service';
+
+type WorkShift = 'morning' | 'afternoon' | 'night' | 'rotating';
+
 /**
  * StaffDocumentInterface: define la estructura de un documento de personal médico en la base de datos.
  * 
@@ -8,9 +14,9 @@ import { Document } from "mongoose";
 export interface StaffDocumentInterface extends Document {
   name: string;
   licenseNumber: number;
-  medicalSpeciality: string;
-  title: string;
-  workShift: string;
+  medicalSpeciality: MedicalSpeciality;
+  title: Title;
+  workShift: WorkShift;
   consultingRoom: string;
   experience: number;
   contact: string;

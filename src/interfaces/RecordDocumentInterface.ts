@@ -9,6 +9,9 @@ interface MedicineList {
   posology: string;
 }
 
+type RegisterState = 'Hospital Admission' | 'Outpatient Consultation';
+
+
 /**
  * RecordDocumentInterface: Define la estructura de un documento de registro médico en la base de datos. 
  * 
@@ -18,7 +21,7 @@ interface MedicineList {
 export interface RecordDocumentInterface extends Document {
   patient: Types.ObjectId;
   responsable: Types.ObjectId;
-  registerType: string;
+  registerType: RegisterState;
   startDate: Date;
   endDate: Date;
   motive: string;

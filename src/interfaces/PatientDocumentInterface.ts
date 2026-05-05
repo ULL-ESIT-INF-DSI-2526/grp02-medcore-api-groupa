@@ -9,6 +9,13 @@ export interface data {
     email: string; 
 }
 
+type Gender = 'male' | 'female' | 'other';
+
+type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
+
+type PatientStatus = 'active' | 'deceased' | 'sick leave';
+
+
 /**
  * PatientDocumentInterface: Define la estructura de un documento de paciente en la base de datos, incluyendo campos como nombre, fecha de nacimiento, 
  * número de seguridad social, género, información de contacto, alergias, tipo de sangre y estado del paciente.
@@ -17,10 +24,11 @@ export interface PatientDocumentInterface extends Document {
     name: string;
     birthDate: Date;
     id: string;
+    age: number;
     socialSecurityNumber: string;
-    gender: string;
+    gender: Gender;
     contactInformation: data;
     alergies: string[];
-    bloodType: string;
-    status: string;
+    bloodType: BloodType;
+    status: PatientStatus;
 }

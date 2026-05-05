@@ -84,4 +84,29 @@ staffRouter.delete('/staff', async(req, res) => {
     }
 });
 
+staffRouter.patch('/staff/:id', async (req, res) => {
+    if (!req.body) {
+        res.status(400).send({
+            error: 'Should provide at least one field to update'
+        });
+    }
+    const actualUpdates = Object.keys(req.body);
+    const allowedUpdates = ['name', 'medicalSpeciality', 'title', 'workShift', 'consultingRoom', 'contactInformation', 'experience', 'status'];
+    const validUpdate = actualUpdates.every(update => allowedUpdates.includes(update));
+    if (!validUpdate) {
+        return res.status(400).send({ 
+            error: 'Only the following fields can be updated: name, medicalSpeciality, title, workShift, consultingRoom, contactInformation, experience, status'
+        });
+    }
+    try {
+        const staff = await Staff.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        if (!staff) {
+            return res.status(404).send({ error: 'Staff not found' });
+        }
+        res.send(staff);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
 

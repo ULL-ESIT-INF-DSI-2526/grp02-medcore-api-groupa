@@ -135,7 +135,7 @@ const RecordSchema = new Schema<RecordDocumentInterface>({
  * Middleware que se ejecuta antes de guardar un documento de Record. Calcula el importe total de la receta sumando el precio de cada medicamento 
  * multiplicado por su cantidad.
  */
-RecordSchema.pre('save', async function () {
+RecordSchema.pre('save', async function (this: RecordDocumentInterface) {
   let total = 0;
 
   const medicineTuple: [Types.ObjectId, number][] = this.medicineList.map(m => [m.medicine, m.quantity]);

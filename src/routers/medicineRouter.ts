@@ -86,3 +86,29 @@ medicineRouter.delete('/medications', async(req, res) => {
         res.status(500).send(error);
     }
 });
+
+medicineRouter.patch('/medications/:id', async (req, res) => {
+    if (!req.body) {
+        res.status(400).send({
+            error: 'Should provide at least one field to update'
+        });
+    }
+    const actualUpdates = Object.keys(req.body);
+    const allowedUpdates = ['name', 'activeIngredient', 'type', 'dosage', 'mesureUnit', 'ingestionMethod', 'stock', 'price', 
+                            'prescriptionRequired', 'expirationDate', 'contraindications'];
+    const validUpdate = actualUpdates.every(update => allowedUpdates.includes(update));
+    if (!validUpdate) {
+        return res.status(400).send({ 
+            error: 'Only the following fields can be updated: name, activeIngredient, dosageForm, administrationRoute, sideEffects, stock, price, prescriptionRequired, expirationDate, contraindications' 
+        });
+    }
+    try {
+        const medicine = await Medicine.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        if (!medicine) {
+            return res.status(404).send({ error: 'Medicine not found' });
+        }
+        res.send(medicine);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});

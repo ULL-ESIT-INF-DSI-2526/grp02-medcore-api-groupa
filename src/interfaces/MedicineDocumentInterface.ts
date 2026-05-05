@@ -1,5 +1,11 @@
 import {Document} from 'mongoose';
 
+type MedicineType = 'capsule' | 'compressed' | 'oral solution' | 'injectable solution' | 'ointment' | 'transdermal patch' | 'inhaler' | 'other';
+
+type MeasureUnit = 'mg' | 'ml' | 'g' | 'units';
+
+type IngestionMethod = 'oral' | 'intravenous' | 'intramuscular' | 'subcutaneous' | 'topical' |'inhalation';
+
 
 /**
  * MedicineDocumentInterface: define la estructura de un documento de medicamento en la base de datos.
@@ -11,13 +17,13 @@ export interface MedicineDocumentInterface extends Document {
     name: string;
     activeIngredient: string;
     nationalID: string;
-    type: string;
+    type: MedicineType;
     dosage: number;
-    mesureUnit: string;
-    ingestionMethod: string;
+    mesureUnit: MeasureUnit;
+    ingestionMethod: IngestionMethod;
     stock: number;
     price: number;
-    preescriptionRequired: boolean;
+    prescriptionRequired: boolean;
     expirationDate: Date;
     contraindications: string[];
 }

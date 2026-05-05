@@ -1,7 +1,9 @@
-import { connect } from 'mongoose';
+import { connect } from "mongoose";
 
-connect('mongodb://127.0.0.1:27017/hospital-app').then(() => {
-  console.log('Connected to the database');
-}).catch(() => {
-  console.log('Something went wrong when conecting to the database');
-});
+try {
+  const mongodb_url = process.env.MONGODB_URL!;
+  await connect(mongodb_url);
+  console.log("Connection to MongoDB server established");
+} catch (error) {
+  console.log(error);
+}

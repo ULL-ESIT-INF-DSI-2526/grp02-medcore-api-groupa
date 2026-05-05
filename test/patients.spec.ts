@@ -9,6 +9,7 @@ describe("Test patients", () => {
     const patientData = {
         name: "Ana Gómez",
         birthDate: "1986-07-20",
+        age: 37,
         id: "87654321X",
         socialSecurityNumber: "341234567890",
         gender: "female",
@@ -120,6 +121,62 @@ describe("Test patients", () => {
             .get("/patients?id=2")
             .expect(500);
             await moongose.connect("mongodb://localhost:27017/hospital-app");
+        });
+    });
+
+    describe('PATCH /patients/:id', () => {
+        test('Debe hacerse la actualizaciñon satisfactoriamente', async () => {
+            await request(app)
+            .patch(`/patients/${idPatient}`)
+            .send({
+                name: "Pepe"
+            })
+            .expect(200);
+        });
+
+        test('El nombre debe de actualizarse satisfactoriamente', async () => {
+            const response = await request(app)
+            .patch(`/patients/${idPatient}`)
+            .send({
+                name: "Pepe"
+            })
+
+            const patientName = response.body.name;
+            expect(patientName).toBe('Pepe');
+        });
+
+        test('Debe de dar error la inserción por busqueda no encontrada', async () => {
+            await request(app)
+            .patch(`/patients/69fa517a5d41db4ed142530c`)
+            .send({
+                name: "Pepe"
+            })
+            .expect(404);
+        });
+
+        test ("Debe dar error si no se introducen datos para actualizar", async () => {
+            await request(app)
+            .patch(`/patients/${idPatient}`)
+            .send()
+            .expect(400);
+        });
+                
+        test("Debe dar error si se intenta actualizar con datos no válidos", async () => {
+            await request(app)
+            .patch(`/patients/${idPatient}`)
+            .send({
+                id: "348384382920c"
+            })
+            .expect(400);
+        });
+
+        test ("Debe dar error si el id no es válido", async () => {
+            await request(app)
+            .patch("/patients/invalid-id")
+            .send({
+                name: "Pepe"
+            })
+            .expect(500);
         });
     });
 

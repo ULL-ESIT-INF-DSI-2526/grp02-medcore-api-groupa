@@ -195,7 +195,52 @@ describe("Staff Test", () => {
         });
     });
 
+    describe('PATCH /staff/:id', () => {
+        test('should update a staff member by ID', async () => {
+            const response = await request(app)
+                .patch(`/staff/${idStaff}`)
+                .send({
+                    name: "Pepe"
+                })
+                .expect(200);
 
+            expect(response.body.name).toBe("Pepe");
+        });
 
+        test('should return 404 if staff member not found', async () => {
+            await request(app)
+                .patch("/staff/69f4f553fcd85dd7d524d54b")
+                .send({
+                    name: "Pepe"
+                })
+                .expect(404);
+        });
+
+        test('should return 500 if invalid ID format', async () => {
+            await request(app)
+                .patch("/staff/invalid-id")
+                .send({
+                    name: "Pepe"
+                })
+                .expect(500);
+        });
+
+        test('should return 400 if no fields to update are provided', async () => {
+            await request(app)
+                .patch(`/staff/${idStaff}`)
+                .send()
+                .expect(400);
+        });
+
+        test('should return 400 if trying to update with invalid data', async () => {
+            await request(app)
+                .patch(`/staff/${idStaff}`)
+                .send({
+                    licenseNumber: "invalid-license-number"
+                })
+                .expect(400);
+        }); 
+
+    });
 
 });
