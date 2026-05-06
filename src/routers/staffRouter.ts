@@ -1,5 +1,6 @@
 import express from 'express';
 import { Staff } from '../models/staff.model.js';
+import { MedicalSpeciality } from '../interfaces/StaffDocumentInterface.js';
 
 export const staffRouter = express.Router();
 
@@ -32,9 +33,9 @@ staffRouter.get('/staff', async(req, res) => {
     try {
         let staff;
         if (name && medicalSpeciality) {  
-            staff = await Staff.findOne({ name: name.toString(), medicalSpeciality: medicalSpeciality.toString()});
+            staff = await Staff.findOne({ name: name.toString(), medicalSpeciality: medicalSpeciality.toString() as MedicalSpeciality});
         } else if (medicalSpeciality) {
-            staff = await Staff.findOne({ medicalSpeciality: medicalSpeciality.toString() });
+            staff = await Staff.findOne({ medicalSpeciality: medicalSpeciality.toString() as MedicalSpeciality });
         } else if (name) {  
             staff = await Staff.findOne({ name: name.toString() });
         } else {
@@ -108,5 +109,43 @@ staffRouter.patch('/staff/:id', async (req, res) => {
         res.status(500).send(error);
     }
 });
+
+staffRouter.put('/staff/:id', async (req, res) => {
+    if (!req.body) {
+        return res.status(400).send({
+            error: 'The body has not been provided'
+        });
+    }
+    const requiredFields = [
+        'name',
+        'licenseNumber',
+        'medicalSpeciality',
+        'title',
+        'workShift',
+        'consultingRoom',
+        'experience',
+        'contact',
+        'state'
+    ];
+    
+    // Comprobamos si falta alguno de los campos esenciales
+    const missingFields = requiredFields.filter(field => !(field in req.body));
+
+    if (missingFields.length > 0) {
+        return res.status(400).send({
+            error: `Missing required fields for PUT: ${missingFields.join(', ')}`
+        });
+    }
+    try {
+        const staff = await Staff.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true, overwrite: true });
+        if (!staff) {
+            return res.status(404).send({ error: 'Staff not found' });
+        } 
+        res.status(200).send(staff);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
 
 

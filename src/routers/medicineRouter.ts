@@ -112,3 +112,43 @@ medicineRouter.patch('/medications/:id', async (req, res) => {
         res.status(500).send(error);
     }
 });
+
+medicineRouter.put('/medications/:id', async (req, res) => {
+    if (!req.body) {
+        return res.status(400).send({
+            error: 'The body has not been provided'
+        });
+    }
+    const requiredFields = [
+        'name', 
+        'activeIngredient', 
+        'nationalID', 
+        'type', 
+        'dosage', 
+        'mesureUnit', 
+        'ingestionMethod', 
+        'stock', 
+        'price', 
+        'prescriptionRequired', 
+        'expirationDate', 
+        'contraindications'
+    ];
+    
+    // Comprobamos si falta alguno de los campos esenciales
+    const missingFields = requiredFields.filter(field => !(field in req.body));
+
+    if (missingFields.length > 0) {
+        return res.status(400).send({
+            error: `Missing required fields for PUT: ${missingFields.join(', ')}`
+        });
+    }
+    try {
+        const medicine = await Medicine.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true, overwrite: true });
+        if (!medicine) {
+            return res.status(404).send({ error: 'Medicine not found' });
+        } 
+        res.status(200).send(medicine);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});

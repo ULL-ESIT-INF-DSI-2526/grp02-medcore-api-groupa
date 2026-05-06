@@ -113,3 +113,31 @@ patientRouter.patch('/patients/:id', async (req, res) => {
         }
     }
 });
+
+patientRouter.put('/patients/:id', async (req, res) => {
+    if (!req.body) {
+        res.status(400).send({
+            error: 'Should provide all fields to update'
+        });
+    } else {
+        const requiredFields = ['name', 'birthDate', 'gender', 'contactInformation', 'alergies', 'bloodType', 'status'];
+        const missingFields = requiredFields.filter(field => !(field in req.body));
+        
+        if (missingFields.length > 0) {
+            return res.status(400).send({
+                error: `Missing required fields for PUT: ${missingFields.join(', ')}`
+            });
+        }
+        try {
+            const patient = await Patient.findByIdAndUpdate( req.params.id, req.body, {new: true, runValidators: true, overwrite: true});
+            if (!patient) {
+                res.status(404).send({
+                    error: 'Patient not found'
+                });
+            } 
+            res.status(200).send(patient);
+        } catch (err) {
+            res.status(500).send(err);
+        }
+    }
+});

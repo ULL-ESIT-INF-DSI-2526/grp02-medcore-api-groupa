@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach } from "vitest";
 import request from "supertest";
 import { app } from "../src/app.js";
 import { Medicine } from "../src/models/medicine.model.js";
-import moongose from "mongoose";
+import mongoose from "mongoose";
 
 describe("Test medications", () => {
     const medicineData = {
@@ -117,11 +117,11 @@ describe("Test medications", () => {
         });
         
         test("Debe dar error desconexion con el servidor", async () => {
-            await moongose.connection.close();
+            await mongoose.connection.close();
             await request(app)
             .get("/medications?name=Paracetamol")
             .expect(500);
-            await moongose.connect("mongodb://localhost:27017/hospital-app");
+            await mongoose.connect("mongodb://localhost:27017/hospital-app");
         });
     });
 
@@ -188,11 +188,11 @@ describe("Test medications", () => {
         });
 
         test("Debe dar error desconexion con el servidor", async () => {
-            await moongose.connection.close();
+            await mongoose.connection.close();
             await request(app)
             .delete("/medications?name=Paracetamol")
             .expect(500);
-            await moongose.connect("mongodb://localhost:27017/hospital-app");
+            await mongoose.connect("mongodb://localhost:27017/hospital-app");
         });
     });
 
@@ -240,6 +240,86 @@ describe("Test medications", () => {
                 hola: "Mundo"
             })
             .expect(400);
+        });
+    });
+
+    describe('PUT /medications/:id', () => {
+        test('Debe actualizar correctamente el medicamento completo', async () => {
+            await request(app)
+            .put(`/medications/${idMedicine}`)
+            .send({
+                name: "Dalcy",
+                activeIngredient: "Paracetamol",
+                nationalID: "1234599990",
+                type: "capsule",
+                dosage: 500,
+                mesureUnit: "mg",
+                ingestionMethod: "oral",
+                stock: 100,
+                price: 5.99,
+                prescriptionRequired: false,
+                expirationDate: new Date("2025-12-31"),
+                contraindications: ["Liver disease", "Allergy to paracetamol"]
+            })
+            .expect(200);
+        });
+
+        test("Debe dar error si el medicamento no existe", async () => {
+            await request(app)
+            .put("/medications/69f4f553fcd85dd7d524d54b")
+            .send({
+                name: "Dalcy",
+                activeIngredient: "Paracetamol",
+                nationalID: "1234599990",
+                type: "capsule",
+                dosage: 500,
+                mesureUnit: "mg",
+                ingestionMethod: "oral",
+                stock: 100,
+                price: 5.99,
+                prescriptionRequired: false,
+                expirationDate: new Date("2025-12-31"),
+                contraindications: ["Liver disease", "Allergy to paracetamol"]
+            })
+            .expect(404);
+        });
+
+        test("Debe dar error si no hay cuerpo en la petición", async () => {
+            await request(app)
+            .put(`/medications/${idMedicine}`)
+            .send()
+            .expect(400);
+        });
+
+        test("Debe dar error si faltan campos obligatorios", async () => {
+            await request(app)
+            .put(`/medications/${idMedicine}`)
+            .send({
+                name: "Dalcy"
+            })
+            .expect(400);
+        });
+
+        test("Debe dar error si no funciona la conexión con el servidor", async () => {
+            await mongoose.connection.close();
+            await request(app)
+            .put(`/medications/${idMedicine}`)
+            .send({
+                name: "Dalcy",
+                activeIngredient: "Paracetamol",
+                nationalID: "1234599990",
+                type: "capsule",
+                dosage: 500,
+                mesureUnit: "mg",
+                ingestionMethod: "oral",
+                stock: 100,
+                price: 5.99,
+                prescriptionRequired: false,
+                expirationDate: new Date("2025-12-31"),
+                contraindications: ["Liver disease", "Allergy to paracetamol"]
+            })
+            .expect(500);
+            await mongoose.connect("mongodb://localhost:27017/hospital-app");
         });
     });
 });

@@ -65,20 +65,20 @@ describe("Staff Test", () => {
     });
 
     describe("GET /staff/:id", () => {
-        test("should return a staff member by ID", async () => {
+        test("Deberia devovler un staff por su id", async () => {
             await request(app)
                 .get(`/staff/${idStaff}`)
                 .expect(200);
             expect(await Staff.countDocuments()).toBe(1);
         });
 
-        test("should return 404 if staff member not found", async () => {
+        test("Deberia devolver 404", async () => {
             await request(app)
                 .get("/staff/69f4f553fcd85dd7d524d54b")
                 .expect(404);
         });
 
-        test ("Should return 500 if invalid ID format", async () => {
+        test ("Deberia devolvererror si se introduce un id invállido", async () => {
             await request(app)
                 .get("/staff/invalid-id")
                 .expect(500);
@@ -86,13 +86,13 @@ describe("Staff Test", () => {
     });
 
     describe("GET /staff", () => {
-        test("should return 400 if there are no query parametres", async () => {
+        test("Debe devolve errror si no se le asigna un query válido", async () => {
             await request(app)
                 .get("/staff")
                 .expect(400);
         });
         
-        test("should return staff members by name", async () => {
+        test("Debe devovler los miembros de staff por nombre", async () => {
             const response = await request(app)
                 .get("/staff?name=Jonas+Almeida")
                 .expect(200);
@@ -100,14 +100,14 @@ describe("Staff Test", () => {
             expect(response.body.name).toBe("Jonas Almeida");
         });
 
-        test("should return staff members by medical speciality", async () => {
+        test("Debe devolver miembros de staff", async () => {
             const response = await request(app)
                 .get("/staff?medicalSpeciality=Cardiology")
                 .expect(200);
             expect(response.body.medicalSpeciality).toBe("Cardiology");
         });
 
-        test("should return staff with name and medical speciality", async () => {
+        test("Debe devoler un staff por nombre y especialidad médica", async () => {
             const response = await request(app)
                 .get("/staff?name=Jonas+Almeida&medicalSpeciality=Cardiology")
                 .expect(200);
@@ -115,7 +115,7 @@ describe("Staff Test", () => {
             expect(response.body.medicalSpeciality).toBe("Cardiology");
         });
 
-        test("should return 404 if no staff members match the query", async () => {
+        test("Deberia devolver 404", async () => {
             await request(app)
                 .get("/staff?name=Nonexistent+Name")
                 .expect(404);
@@ -132,7 +132,7 @@ describe("Staff Test", () => {
     });
 
     describe("DELETE /staff/:id", () => {
-        test("should delete a staff member by ID", async () => {
+        test("Debe devolver un staff por su id", async () => {
             await request(app)
                 .delete(`/staff/${idStaff}`)
                 .expect(200);
@@ -196,7 +196,7 @@ describe("Staff Test", () => {
     });
 
     describe('PATCH /staff/:id', () => {
-        test('should update a staff member by ID', async () => {
+        test('debería poder camv', async () => {
             const response = await request(app)
                 .patch(`/staff/${idStaff}`)
                 .send({
@@ -207,7 +207,7 @@ describe("Staff Test", () => {
             expect(response.body.name).toBe("Pepe");
         });
 
-        test('should return 404 if staff member not found', async () => {
+        test('deberia retornar 404 si el id no existe', async () => {
             await request(app)
                 .patch("/staff/69f4f553fcd85dd7d524d54b")
                 .send({
@@ -216,7 +216,7 @@ describe("Staff Test", () => {
                 .expect(404);
         });
 
-        test('should return 500 if invalid ID format', async () => {
+        test('deberia retornar 500 si no proporcionamos un formato de id valido', async () => {
             await request(app)
                 .patch("/staff/invalid-id")
                 .send({
@@ -225,7 +225,7 @@ describe("Staff Test", () => {
                 .expect(500);
         });
 
-        test('should return 400 if no fields to update are provided', async () => {
+        test('deberia retornar 400 si ', async () => {
             await request(app)
                 .patch(`/staff/${idStaff}`)
                 .send()
@@ -243,4 +243,72 @@ describe("Staff Test", () => {
 
     });
 
+    describe('PUT /staff/:id', () => {
+        test('should replace a staff member by ID', async () => {
+            const response = await request(app)
+                .put(`/staff/${idStaff}`)
+                .send({
+                    name: "Jonas Rodriguez",
+                    licenseNumber: 333333,
+                    medicalSpeciality: 'Cardiology',
+                    title: 'Attending Physician',
+                    workShift: "morning",
+                    consultingRoom: 'A54',
+                    experience: 10,
+                    contact: "+34602115233",
+                    state: true
+                });
+            expect(response.status).toBe(200);
+        });
+
+        test('should return 404 if staff member not found', async () => {
+            await request(app)
+                .put("/staff/69f4f553fcd85dd7d524d54b")
+                .send({
+                    name: "Jonas Rodriguez",
+                    licenseNumber: 333333,
+                    medicalSpeciality: 'Cardiology',
+                    title: 'Attending Physician',
+                    workShift: "morning",
+                    consultingRoom: 'A54',
+                    experience: 10,
+                    contact: "+34602115233",
+                    state: true
+                })
+                .expect(404);
+        });
+
+        test('should return 400 if no fields to update are provided', async () => {
+            await request(app)
+                .put(`/staff/${idStaff}`)
+                .send()
+                .expect(400);
+        });
+
+        test('should return 400 if trying to update with invalid data', async () => {
+            await request(app)
+                .put(`/staff/${idStaff}`)
+                .send({
+                    name: "Jonas Rodriguez",
+                })
+                .expect(400);
+        });
+
+        test('should return 500 if invalid ID format', async () => {
+            await request(app)
+                .put("/staff/invalid-id")
+                .send({
+                    name: "Jonas Rodriguez",
+                    licenseNumber: 333333,
+                    medicalSpeciality: 'Cardiology',
+                    title: 'Attending Physician',
+                    workShift: "morning",
+                    consultingRoom: 'A54',
+                    experience: 10,
+                    contact: "+34602115233",
+                    state: true
+                })
+                .expect(500);
+        });
+    });
 });

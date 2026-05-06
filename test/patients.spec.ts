@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach } from "vitest";
 import request from "supertest";
 import { app } from "../src/app.js";
 import { Patient } from "../src/models/patient.model.js";
-import moongose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 
 describe("Test patients", () => {
 
@@ -116,11 +116,11 @@ describe("Test patients", () => {
         });
 
         test("Debe dar error si el id no es válido", async () => {
-            await moongose.connection.close();
+            await mongoose.connection.close();
             await request(app)
             .get("/patients?id=2")
             .expect(500);
-            await moongose.connect("mongodb://localhost:27017/hospital-app");
+            await mongoose.connect("mongodb://localhost:27017/hospital-app");
         });
     });
 
@@ -231,11 +231,101 @@ describe("Test patients", () => {
         });
 
         test("Debe dar error si el id no es válido", async () => {
-            await moongose.connection.close();
+            await mongoose.connection.close();
             await request(app)
             .delete("/patients?id=2")
             .expect(500);
-            await moongose.connect("mongodb://localhost:27017/hospital-app");
+            await mongoose.connect("mongodb://localhost:27017/hospital-app");
+        });
+    });
+
+    describe('PUT /patients/:id', () => {
+        test('Debe hacerse la actualización satisfactoriamente', async () => {
+            await request(app)
+            .put(`/patients/${idPatient}`)
+            .send({
+                name: "Ana Rodríguez",
+                birthDate: "1986-07-20",
+                age: 72,
+                id: "87654321X",
+                socialSecurityNumber: "341234567890",
+                gender: "female",
+                contactInformation: [{
+                    address: "Calle ",
+                    contactNumber: "+34600112233",
+                    email: "juanperez@gmail.com"
+                }],
+                alergies: [],
+                bloodType: "O+",
+                status: "active"
+            })
+            .expect(200);
+        });
+
+        test('El nombre debe de actualizarse satisfactoriamente', async () => {
+            await request(app)
+            .put(`/patients/69f4f553fcd85dd7d524d54b`)
+            .send({
+                name: "Ana Rodríguez",
+                birthDate: "1986-07-20",
+                age: 72,
+                id: "87654321X",
+                socialSecurityNumber: "341234567890",
+                gender: "female",
+                contactInformation: [{
+                    address: "Calle ",
+                    contactNumber: "+34600112233",
+                    email: "juanperez@gmail.com"
+                }],
+                alergies: [],
+                bloodType: "O+",
+                status: "active"
+            })
+            .expect(404);
+        });
+
+        test ("Debe dar error si no se introducen datos para actualizar", async () => {
+            await request(app)
+            .put(`/patients/${idPatient}`)
+            .send()
+            .expect(400);
+        });
+
+        test("Debe dar error del servidor", async () => {
+            await mongoose.connection.close();
+            await request(app)
+            .put(`/patients/${idPatient}`)
+            .send({
+                name: "Ana Rodríguez",
+                birthDate: "1986-07-20",
+                age: 72,
+                id: "87654321X",
+                socialSecurityNumber: "341234567890",
+                gender: "female",
+                contactInformation: [{
+                    address: "Calle ",
+                    contactNumber: "+34600112233",
+                    email: "juanperez@gmail.com"
+                }],
+                alergies: [],
+                bloodType: "O+",
+                status: "active"
+            })
+            .expect(500);
+            await mongoose.connect("mongodb://localhost:27017/hospital-app");
+        });
+
+        test("Debe dar error si se intenta actualizar con datos no válidos", async () => {
+            await request(app)
+            .put(`/patients/${idPatient}`)
+            .send({
+                name: "Ana Rodríguez",
+                birthDate: "1986-07-20",
+                age: 72,
+                id: "2",
+                socialSecurityNumber: "341234567890"
+            })
+            .expect(400);
         });
     });
 });

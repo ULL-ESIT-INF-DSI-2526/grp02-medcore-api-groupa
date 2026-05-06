@@ -3,7 +3,7 @@ import { Document, Types } from "mongoose";
 /**
  * MedicineList: Define la estructura de un medicamento asociado a un registro médico, incluyendo una referencia al medicamento, la cantidad y la posología.
  */
-interface MedicineList {
+export interface MedicineList {
   medicine: Types.ObjectId;
   quantity: number;
   posology: string;

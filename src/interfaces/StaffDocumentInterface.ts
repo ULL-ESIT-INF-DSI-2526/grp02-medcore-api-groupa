@@ -1,10 +1,10 @@
 import { Document } from "mongoose";
 
-type MedicalSpeciality = 'General Medicine' | 'Cardiology' | 'Traumatology' | 'Pediatry' | 'Oncology' | 'Urgency';
+export type MedicalSpeciality = 'General Medicine' | 'Cardiology' | 'Traumatology' | 'Pediatry' | 'Oncology' | 'Urgency';
 
-type Title = 'Attending Physician' | 'Resident Physician' | 'Nurse' | 'Nursing Assistant' | 'Chief of Service';
+export type Title = 'Attending Physician' | 'Resident Physician' | 'Nurse' | 'Nursing Assistant' | 'Chief of Service';
 
-type WorkShift = 'morning' | 'afternoon' | 'night' | 'rotating';
+export type WorkShift = 'morning' | 'afternoon' | 'night' | 'rotating';
 
 /**
  * StaffDocumentInterface: define la estructura de un documento de personal médico en la base de datos.
