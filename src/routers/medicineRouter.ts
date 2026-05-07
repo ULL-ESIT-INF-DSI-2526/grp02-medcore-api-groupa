@@ -1,5 +1,6 @@
 import express from 'express';
 import { Medicine } from '../models/medicine.model.js';
+import { Record } from '../models/record.model.js';
 
 export const medicineRouter = express.Router();
 
@@ -182,6 +183,11 @@ medicineRouter.delete('/medications/:id', async(req, res) => {
         if (!medicine) {
             return res.status(404).send();
         }
+        
+        await Record.updateMany(
+            { 'medicineList.medicine': req.params.id },
+            { $pull: { medicineList: { medicine: req.params.id } } }
+        );  
         res.send(medicine);
     } catch (error) {
         res.status(500).send(error);
@@ -242,12 +248,21 @@ medicineRouter.delete('/medications', async(req, res) => {
             return res.status(400).send({ error: 'Should provide at least one criterion: name, activeIngredient or nationalID' });
         }
 
-        const medicine = await Medicine.deleteMany(filter);
+        const medicinesToDelete = await Medicine.find(filter).select('_id');
+        const ids = medicinesToDelete.map(m => m._id);
 
-        if (medicine.deletedCount === 0) {
+        const result = await Medicine.deleteMany({ _id: { $in: ids } });
+
+        await Record.updateMany(
+            { "medicineList.medicine": { $in: ids } },
+            { $pull: { medicineList: { medicine: { $in: ids } } } }
+        );
+
+        if (result.deletedCount === 0) {
             return res.status(404).send();
         }
-        res.send(medicine);
+        
+        res.send(result);
     } catch (error) {
         res.status(500).send(error);
     }

@@ -1,6 +1,8 @@
 import express from 'express';
 import { Staff } from '../models/staff.model.js';
 import { MedicalSpeciality } from '../interfaces/StaffDocumentInterface.js';
+import { Record } from '../models/record.model.js';
+import { Medicine } from '../models/medicine.model.js';
 
 export const staffRouter = express.Router();
 
@@ -178,6 +180,19 @@ staffRouter.get('/staff', async(req, res) => {
  */
 staffRouter.delete('/staff/:id', async(req, res) => {
     try {
+        const record = await Record.find({ responsable: req.params.id });
+        for (const r of record) {
+            const medicines = r.medicineList;
+            for (const m in medicines) {
+                const medicine = await Medicine.findById(medicines[m].medicine);
+                if (medicine) {
+                    medicine.stock += medicines[m].quantity;
+                    await medicine.save();
+                }
+            }
+
+            const delete_record = await Record.findByIdAndDelete(r._id);
+        }
         const staff = await Staff.findByIdAndDelete(req.params.id);
         if (!staff) {
             return res.status(404).send({ error: 'Staff not found' });
@@ -237,12 +252,27 @@ staffRouter.delete('/staff', async(req, res) => {
         if (Object.keys(filter).length === 0) {
             return res.status(400).send({ error: 'Should provide at least one criterion: name or medicalSpeciality' });
         }
+        const staffIds = (await Staff.find(filter)).map(s => s._id);
+        const record = await Record.find({ responsable: { $in: staffIds } });
+
+        for (const r of record) {
+            const medicines = r.medicineList;
+            for (const m in medicines) {
+                const medicine = await Medicine.findById(medicines[m].medicine);
+                if (medicine) {
+                    medicine.stock += medicines[m].quantity;
+                    await medicine.save();
+                }
+            }
+
+            const delete_record = await Record.findByIdAndDelete(r._id);
+        }
 
         const staff = await Staff.deleteMany(filter);
-
         if (staff.deletedCount === 0) {
             return res.status(404).send({error: 'Staff not found'});
         }
+
         res.send(staff);
     } catch (error) {
         res.status(500).send(error);

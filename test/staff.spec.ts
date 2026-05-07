@@ -2,6 +2,9 @@ import { describe, test, expect, beforeEach } from "vitest";
 import request from "supertest";
 import { app } from "../src/app.js";
 import { Staff } from "../src/models/staff.model.js";
+import { Medicine } from "../src/models/medicine.model.js";
+import { Record } from "../src/models/record.model.js";
+import { Patient } from "../src/models/patient.model.js";
 import mongoose from "mongoose";
 
 describe("Staff Test", () => {
@@ -17,10 +20,75 @@ describe("Staff Test", () => {
         state: true
     };
 
+    const patientData = {
+        name: "Ana Gómez",
+        birthDate: "1986-07-20",
+        age: 37,
+        id: "87653323X",
+        socialSecurityNumber: "341234567890",
+        gender: "female",
+        contactInformation: [{
+            address: "Calle ",
+            contactNumber: "+34600112233",
+            email: "juanperez@gmail.com"
+        }],
+        alergies: ["Polen", "Penicilina"],
+        bloodType: "O+",
+        status: "active"
+    };
+
+    const medicineData = {
+        name: "Paracetamol",
+        activeIngredient: "Paracetamol",
+        nationalID: "1234567870",
+        type: "capsule",
+        dosage: 500,
+        mesureUnit: "mg",
+        ingestionMethod: "oral",
+        stock: 100,
+        price: 5.99,
+        prescriptionRequired: false,
+        expirationDate: new Date("2027-12-31"),
+        contraindications: ["Liver disease", "Allergy to paracetamol"]
+    };
+
+    const medicineData2 = {
+        name: "Ibuprofen",
+        activeIngredient: "Ibuprofen",
+        nationalID: "0987654331",
+        type: "inhaler",
+        dosage: 200,
+        mesureUnit: "mg",
+        ingestionMethod: "oral",
+        stock: 50,
+        price: 3.99,
+        prescriptionRequired: false,
+        expirationDate: new Date("2027-12-31"),
+        contraindications: ["Stomach ulcers", "Allergy to ibuprofen"]
+    };
+
+    const recordData = {
+        patient: patientData.id,
+        responsable: staffData.licenseNumber,
+        registerType: "Hospital Admission",
+        startDate: new Date(2026, 1, 1),
+        endDate: new Date(2026, 1, 15),
+        motive: "Patient admitted for severe headache and dizziness",
+        diagnosis: "Headache",
+        medicineList: [
+            { medicine: medicineData.nationalID , quantity: 2, posology: "Take 500mg every 6 hours" },
+            { medicine: medicineData2.nationalID, quantity: 1, posology: "Take 200mg every 8 hours" }
+        ],
+        registerState: "active"
+     };
+
     let idStaff: string;
 
     beforeEach(async () => {
         await Staff.deleteMany();
+        await Medicine.deleteMany();
+        await Record.deleteMany();
+        await Patient.deleteMany();
         const staff = await new Staff(staffData).save();
         idStaff = staff._id.toString();
     });
@@ -150,6 +218,28 @@ describe("Staff Test", () => {
                 .delete("/staff/invalid-id")
                 .expect(500);
         });
+
+        test("Si elimina un paciente, se eliminan las consultas a su nombre", async () => {
+            const medicine = await new Medicine(medicineData).save();
+            const patient = await new Patient(patientData).save();
+
+            const recordToSave = {
+                ...recordData,
+                patient: patient._id,        
+                responsable: idStaff,    
+                medicineList: [
+                    { medicine: medicine._id , quantity: 2, posology: "Take 500mg every 6 hours" },
+                ]
+            };
+
+            const record = await new Record(recordToSave).save();
+            const response = await request(app)
+            .delete(`/staff/${idStaff}`)
+            .expect(200);
+
+            const updatedMedicine = await Medicine.findById(medicine._id);
+            expect(updatedMedicine?.stock).toBe(102);
+        });
     });
 
     describe ("DELETE /staff", () => {
@@ -193,6 +283,30 @@ describe("Staff Test", () => {
                 .expect(500);
             await mongoose.connect("mongodb://localhost:27017/hospital-app");
         });
+        
+        test("Si elimina un paciente, se eliminan las consultas a su nombre", async () => {
+            const medicine = await new Medicine(medicineData).save();
+            const patient = await new Patient(patientData).save();
+
+            const recordToSave = {
+                ...recordData,
+                patient: patient._id,        
+                responsable: idStaff,    
+                medicineList: [
+                    { medicine: medicine._id , quantity: 2, posology: "Take 500mg every 6 hours" },
+                ]
+            };
+
+            const record = await new Record(recordToSave).save();
+            const response = await request(app)
+            .delete("/staff?name=Jonas+Almeida")
+            .expect(200);
+
+            const updatedMedicine = await Medicine.findById(medicine._id);
+            expect(updatedMedicine?.stock).toBe(102);
+        });
+        
+
     });
 
     describe('PATCH /staff/:id', () => {
@@ -240,6 +354,8 @@ describe("Staff Test", () => {
                 })
                 .expect(400);
         }); 
+
+        
 
     });
 

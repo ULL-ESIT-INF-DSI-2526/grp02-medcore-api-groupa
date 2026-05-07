@@ -1,5 +1,8 @@
 import express from 'express';
 import { Patient } from '../models/patient.model.js';
+import { deleteRecord } from '../controllers/record/deleteRecord.js';
+import { Record } from '../models/record.model.js';
+import { Medicine } from '../models/medicine.model.js';
 
 export const patientRouter = express.Router();
 
@@ -172,7 +175,20 @@ patientRouter.get('/patients', async(req, res) => {
  */
 patientRouter.delete('/patients/:id', async(req, res) => {
     try {
-        const patient = await Patient.findByIdAndDelete(req.params.id);
+        const record = await Record.find({ patient: req.params.id });
+        for (const r of record) {
+            const medicines = r.medicineList;
+            for (const m in medicines) {
+                const medicine = await Medicine.findById(medicines[m].medicine);
+                if (medicine) {
+                    medicine.stock += medicines[m].quantity;
+                    await medicine.save(); 
+                }
+            }
+
+            const delete_record = await Record.findByIdAndDelete(r._id);
+        }
+        const patient = await Patient.findByIdAndDelete(req.params.id);        
         if (!patient) {
             return res.status(404).send();
         }
@@ -231,8 +247,22 @@ patientRouter.delete('/patients', async(req, res) => {
             return res.status(400).send({ error: 'Should provide at least one criterion: name or id' });
         }
 
-        const result = await Patient.deleteMany(filter);
+        const patientIds = (await Patient.find(filter)).map(p => p._id);
+        const record = await Record.find({ patient: { $in: patientIds } });
+        for (const r of record) {
+            const medicines = r.medicineList;
+            for (const m in medicines) {
+                const medicine = await Medicine.findById(medicines[m].medicine);
+                if (medicine) {
+                   medicine.stock += medicines[m].quantity;
+                   await medicine.save();
+                }
+            }
 
+            const delete_record = await Record.findByIdAndDelete(r._id);
+        }
+
+        const result = await Patient.deleteMany(filter);
         if (result.deletedCount === 0) {
             return res.status(404).send();
         }
