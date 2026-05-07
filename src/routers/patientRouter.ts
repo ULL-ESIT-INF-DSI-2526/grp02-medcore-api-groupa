@@ -130,7 +130,7 @@ patientRouter.get('/patients', async(req, res) => {
         } else if (name) {  
             patient = await Patient.findOne({ name: name.toString() });
         } else {
-            return res.status(400).send({ error: 'Debe proporcionar un nombre o un número de identificación' });
+            return res.status(400).send({ error: 'Should provide at least one criterion: name or id' });
         }
         if (!patient) {
             return res.status(404).send();
@@ -228,7 +228,7 @@ patientRouter.delete('/patients', async(req, res) => {
         if (id) filter.id = id.toString();
 
         if (Object.keys(filter).length === 0) {
-            return res.status(400).send({ error: 'Debe proporcionar al menos un criterio: name o id'});
+            return res.status(400).send({ error: 'Should provide at least one criterion: name or id' });
         }
 
         const result = await Patient.deleteMany(filter);
@@ -369,9 +369,7 @@ patientRouter.put('/patients/:id', async (req, res) => {
         try {
             const patient = await Patient.findByIdAndUpdate( req.params.id, req.body, {new: true, runValidators: true, overwrite: true});
             if (!patient) {
-                res.status(404).send({
-                    error: 'Patient not found'
-                });
+                res.status(404).send({ error: 'Patient not found'});
             } 
             res.status(200).send(patient);
         } catch (err) {

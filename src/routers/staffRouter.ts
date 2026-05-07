@@ -135,10 +135,10 @@ staffRouter.get('/staff', async(req, res) => {
         } else if (name) {  
             staff = await Staff.findOne({ name: name.toString() });
         } else {
-            return res.status(400).send({ error: 'Debe proporcionar un nombre o un número de identificación' });
+            return res.status(400).send({ error: 'Should provide at least one criterion: name or medicalSpeciality' });
         }
         if (!staff) {
-            return res.status(404).send({ error: 'No se encontró ningún registro para eliminar con los filtros dados' });
+            return res.status(404).send({ error: 'Staff not found' });
         }
         res.send(staff);
     } catch (error) {
@@ -235,13 +235,13 @@ staffRouter.delete('/staff', async(req, res) => {
         if (medicalSpeciality) filter.medicalSpeciality = medicalSpeciality.toString();
 
         if (Object.keys(filter).length === 0) {
-            return res.status(400).send({ error: 'Debe proporcionar al menos un criterio de búsqueda' });
+            return res.status(400).send({ error: 'Should provide at least one criterion: name or medicalSpeciality' });
         }
 
         const staff = await Staff.deleteMany(filter);
 
         if (staff.deletedCount === 0) {
-            return res.status(404).send({error: 'No se encontró ningún registro para eliminar con los filtros dados'});
+            return res.status(404).send({error: 'Staff not found'});
         }
         res.send(staff);
     } catch (error) {

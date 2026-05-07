@@ -134,7 +134,7 @@ medicineRouter.get('/medications', async(req, res) => {
         if (nationalID) filter.nationalID = nationalID.toString();
 
         if (Object.keys(filter).length === 0) {
-            return res.status(400).send({ error: 'Debe proporcionar al menos un criterio: name, activeIngredient o nationalID'});
+            return res.status(400).send({ error: 'Should provide at least one criterion: name, activeIngredient or nationalID' });
         }
 
         const medicine = await Medicine.findOne(filter);
@@ -239,7 +239,7 @@ medicineRouter.delete('/medications', async(req, res) => {
         if (nationalID) filter.nationalID = nationalID.toString();
 
         if (Object.keys(filter).length === 0) {
-            return res.status(400).send({ error: 'Debe proporcionar al menos un criterio de búsqueda' });
+            return res.status(400).send({ error: 'Should provide at least one criterion: name, activeIngredient or nationalID' });
         }
 
         const medicine = await Medicine.deleteMany(filter);

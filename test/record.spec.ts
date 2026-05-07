@@ -36,7 +36,7 @@ describe("Record Router", () => {
         stock: 100,
         price: 5.99,
         prescriptionRequired: false,
-        expirationDate: new Date("2025-12-31"),
+        expirationDate: new Date("2027-12-31"),
         contraindications: ["Liver disease", "Allergy to paracetamol"]
     };
 
@@ -51,7 +51,7 @@ describe("Record Router", () => {
         stock: 50,
         price: 3.99,
         prescriptionRequired: false,
-        expirationDate: new Date("2024-12-31"),
+        expirationDate: new Date("2027-12-31"),
         contraindications: ["Stomach ulcers", "Allergy to ibuprofen"]
     };
 
@@ -111,7 +111,7 @@ describe("Record Router", () => {
 
     describe("POST /records", () => {
         test("Deberia crear un nuevo registro", async () => {
-            await request(app)
+            const response = await request(app)
                 .post("/records")
                 .send({
                     patient: patientData.id,
@@ -125,8 +125,8 @@ describe("Record Router", () => {
                         { medicine: medicineData.nationalID , quantity: 2, posology: "Take 500mg every 6 hours" }
                     ],
                     registerState: "active"
-                })
-                .expect(201);
+                });
+                expect(response.status).toBe(201);
         });
 
         test("Deberia devolver un error si el paciente no existe", async () => {
@@ -179,6 +179,50 @@ describe("Record Router", () => {
                 .expect(500);
 
             await mongoose.connect("mongodb://localhost:27017/hospital-app");
+        });
+
+        test("Deberia dar error si el responsable esta inactivo", async () => {
+            await Staff.findOneAndUpdate({ licenseNumber: staffData.licenseNumber }, { state: false });
+
+            await request(app)
+                .post("/records")
+                .send({
+                    patient: patientData.id,
+                    responsable: staffData.licenseNumber,
+                    registerType: "Hospital Admission",
+                    startDate: new Date(2026, 1, 1),
+                    endDate: new Date(2026, 1, 15),
+                    motive: "Patient admitted for severe headache and dizziness",
+                    diagnosis: "Headache",
+                    medicineList: [
+                        { medicine: medicineData.nationalID , quantity: 2, posology: "Take 500mg every 6 hours" },
+                        { medicine: medicineData2.nationalID, quantity: 1, posology: "Take 200mg every 8 hours" }
+                    ],
+                    registerState: "active"
+                })
+                .expect(409);
+        });
+
+        test("Deberia dar error si el medicamento ha expirado", async () => {
+            await Medicine.findOneAndUpdate({ nationalID: medicineData.nationalID }, { expirationDate: new Date(2020, 1, 1) });
+
+            await request(app)
+                .post("/records")
+                .send({
+                    patient: patientData.id,
+                    responsable: staffData.licenseNumber,
+                    registerType: "Hospital Admission",
+                    startDate: new Date(2026, 1, 1),
+                    endDate: new Date(2026, 1, 15),
+                    motive: "Patient admitted for severe headache and dizziness",
+                    diagnosis: "Headache",
+                    medicineList: [
+                        { medicine: medicineData.nationalID , quantity: 2, posology: "Take 500mg every 6 hours" },
+                        { medicine: medicineData2.nationalID, quantity: 1, posology: "Take 200mg every 8 hours" }
+                    ],
+                    registerState: "active"
+                })
+                .expect(409);
         });
 
         test ("Deberia dar error si el responsable no existe", async () => {
@@ -240,7 +284,7 @@ describe("Record Router", () => {
                     ],
                     registerState: "active"
                 })
-                .expect(400);
+                .expect(409);
         });
     });
 
@@ -477,7 +521,7 @@ describe("Record Router", () => {
          });
 
          test("Debe dar bien", async () => {
-            await request(app)
+            const response = await request(app)
                 .patch(`/records/${recordID}`)
                 .send({ 
                     medicineList: [

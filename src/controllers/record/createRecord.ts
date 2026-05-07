@@ -26,6 +26,10 @@ export const createRecord = async (req: Request, res: Response) => {
     const staff = await Staff.findOne({ licenseNumber: req.body.responsable });
     if (!staff) return res.status(404).send({ error: 'Staff not found' });
     
+    if (staff.state === false) {
+      return res.status(409).send({error: "The selected staff is currently inactive"});
+    }
+    
     const medicines = await medicineValidator(req.body.medicineList);
     
     req.body.patient = patient._id;
@@ -53,7 +57,8 @@ export const medicineValidator = async (medicines: MedicineList[]) => {
 
     if (!medicineFounded) throw {status: 400, message: 'Medicine not found'};
     
-    if (medicineFounded.stock < m.quantity) throw {status: 400, message: 'Insufficient stock'};
+    if (medicineFounded.stock < m.quantity) throw {status: 409, message: 'Insufficient stock'};
+    if (medicineFounded.expirationDate < new Date()) throw {status: 409, message: 'Expiration date has already pass'};
     
     medicineFounded.stock -= m.quantity;
     m.medicine = medicineFounded._id;
@@ -62,3 +67,4 @@ export const medicineValidator = async (medicines: MedicineList[]) => {
   }
   return medicines;
 }
+
