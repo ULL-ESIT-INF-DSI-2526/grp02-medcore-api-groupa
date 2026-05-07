@@ -5,7 +5,12 @@ import {Staff} from '../../models/staff.model.js';
 import {Medicine} from '../../models/medicine.model.js';
 import {MedicineList} from '../../interfaces/RecordDocumentInterface.js';
 
-
+/**
+ * Función para eliminar una consulta medica por query string.
+ * @param req - Request con el id de la consulta a eliminar en query string.
+ * @param res - Response con el resultado de la operación.
+ * @returns Devuelve un codigo de estado y la consulta eliminada o un mensaje de error.
+ */
 export const deleteRecord = async (req: Request, res: Response) => {
     if (!req.query.id) return res.status(400).send({ error: 'Id has not been provided' })
     try {
@@ -22,13 +27,18 @@ export const deleteRecord = async (req: Request, res: Response) => {
             await medicineFounded.save();
         }
         const recordDeleted = await Record.findByIdAndDelete(req.query.id);
-        res.status(204).send(recordDeleted);
+        res.status(200).send(recordDeleted);
     } catch (err) { 
         res.status(500).send(err);
     }
 }
 
-
+/**
+ * Elimina una consulta medica por su id de MongoDB.
+ * @param req - Request con el id de la consulta a eliminar en params.
+ * @param res - Response con el resultado de la operación.
+ * @returns Devuelve un codigo de estado y la consulta eliminada o un mensaje de error.
+ */
 export const deleteRecordById = async (req: Request, res: Response) => {
     const recordId = req.params.id;
     try {
@@ -49,7 +59,7 @@ export const deleteRecordById = async (req: Request, res: Response) => {
         }
 
         const delete_record = await Record.findByIdAndDelete(recordId);
-        res.status(204).send(delete_record);
+        res.status(200).send(delete_record);
     }
     catch(error) {
         res.status(500).send(error);

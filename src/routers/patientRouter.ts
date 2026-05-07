@@ -3,6 +3,32 @@ import { Patient } from '../models/patient.model.js';
 
 export const patientRouter = express.Router();
 
+/**
+ * @swagger
+ * /patients:
+ *   post:
+ *     summary: Crea un nuevo paciente
+ *     tags: [Patients]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/PatientCreate'
+ *     responses:
+ *       201:
+ *         description: Paciente creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Patient'
+ *       400:
+ *         description: Error en la validación de los datos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 patientRouter.post('/patients', async(req, res) => {
     const patient = new Patient(req.body);
     try {
@@ -13,6 +39,35 @@ patientRouter.post('/patients', async(req, res) => {
     }
 })
 
+/**
+ * @swagger
+ * /patients/{id}:
+ *   get:
+ *     summary: Obtiene un paciente por su _id de MongoDB
+ *     tags: [Patients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: El ID generado por MongoDB (_id)
+ *     responses:
+ *       200:
+ *         description: Datos del paciente encontrados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Patient'
+ *       404:
+ *         description: Paciente no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error interno del servidor
+ */
 patientRouter.get('/patients/:id', async(req, res) => {
     try {
         const patient = await Patient.findById(req.params.id);
@@ -25,6 +80,45 @@ patientRouter.get('/patients/:id', async(req, res) => {
     }
 })
 
+/**
+ * @swagger
+ * /patients:
+ *   get:
+ *     summary: Busca un paciente por nombre y/o ID personalizado
+ *     tags: [Patients]
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Nombre del paciente
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         description: ID personalizado del paciente (distinto al _id)
+ *     responses:
+ *       200:
+ *         description: Paciente encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Patient'
+ *       400:
+ *         description: Falta proporcionar nombre o ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Paciente no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error interno del servidor
+ */
 patientRouter.get('/patients', async(req, res) => {
     const { name, id } = req.query;
     try {
@@ -48,7 +142,34 @@ patientRouter.get('/patients', async(req, res) => {
 });
 
 
-
+/**
+ * @swagger
+ * /patients/{id}:
+ *   delete:
+ *     summary: Elimina un paciente por su _id de MongoDB
+ *     tags: [Patients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Paciente eliminado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Patient'
+ *       404:
+ *         description: Paciente no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error interno del servidor
+ */
 patientRouter.delete('/patients/:id', async(req, res) => {
     try {
         const patient = await Patient.findByIdAndDelete(req.params.id);
@@ -61,6 +182,43 @@ patientRouter.delete('/patients/:id', async(req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /patients:
+ *   delete:
+ *     summary: Elimina múltiples pacientes basados en filtros (nombre o ID)
+ *     tags: [Patients]
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Resultado de la eliminación masiva
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Patient'
+ *       400:
+ *         description: No se proporcionaron criterios de eliminación
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: No se encontró ningún paciente para borrar
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error interno del servidor
+ */
 patientRouter.delete('/patients', async(req, res) => {
     const { name, id } = req.query;
     try {
@@ -84,6 +242,46 @@ patientRouter.delete('/patients', async(req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /patients/{id}:
+ *   patch:
+ *     summary: Actualiza parcialmente los datos de un paciente
+ *     tags: [Patients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/PatientUpdate'
+ *     responses:
+ *       200:
+ *         description: Paciente actualizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Patient'
+ *       400:
+ *         description: Campos inválidos o cuerpo vacío
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Paciente no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error interno del servidor
+ */
 patientRouter.patch('/patients/:id', async (req, res) => {
     if (!req.body) {
         res.status(400).send({
@@ -114,6 +312,46 @@ patientRouter.patch('/patients/:id', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /patients/{id}:
+ *   put:
+ *     summary: Reemplaza todos los datos de un paciente
+ *     tags: [Patients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/PatientCreate'
+ *     responses:
+ *       200:
+ *         description: Paciente reemplazado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Patient'
+ *       400:
+ *         description: Faltan campos obligatorios
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Paciente no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error interno del servidor
+ */
 patientRouter.put('/patients/:id', async (req, res) => {
     if (!req.body) {
         res.status(400).send({

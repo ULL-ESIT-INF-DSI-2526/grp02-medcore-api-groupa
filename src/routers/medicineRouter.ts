@@ -3,6 +3,32 @@ import { Medicine } from '../models/medicine.model.js';
 
 export const medicineRouter = express.Router();
 
+/**
+ * @swagger
+ * /medications:
+ *   post:
+ *     summary: Crea una nueva medicina
+ *     tags: [Medicines]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/MedicineCreate'
+ *     responses:
+ *       201:
+ *         description: Medicina creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Medicine'
+ *       400:
+ *         description: Error en la validación
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 medicineRouter.post('/medications', async(req, res) => {
     const patient = new Medicine(req.body);
     try {
@@ -13,7 +39,35 @@ medicineRouter.post('/medications', async(req, res) => {
     }
 })
 
-//Get por el identificador unico de mongoose
+/**
+ * @swagger
+ * /medications/{id}:
+ *   get:
+ *     summary: Obtiene una medicina por su ID de Mongoose
+ *     tags: [Medicines]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID único de la medicina
+ *     responses:
+ *       200:
+ *         description: Medicina encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Medicine'
+ *       404:
+ *         description: Medicina no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error del servidor
+ */
 medicineRouter.get('/medications/:id', async(req, res) => {
     try {
         const medicine = await Medicine.findById(req.params.id);
@@ -26,7 +80,50 @@ medicineRouter.get('/medications/:id', async(req, res) => {
     }
 })
 
-// Get por nombre comercial, principio activo o codigo nacional
+/**
+ * @swagger
+ * /medications:
+ *   get:
+ *     summary: Busca una medicina por nombre, principio activo o ID nacional
+ *     tags: [Medicines]
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Nombre comercial
+ *       - in: query
+ *         name: activeIngredient
+ *         schema:
+ *           type: string
+ *         description: Principio activo
+ *       - in: query
+ *         name: nationalID
+ *         schema:
+ *           type: string
+ *         description: Código nacional
+ *     responses:
+ *       200:
+ *         description: Medicina encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Medicine'
+ *       400:
+ *         description: No se proporcionaron criterios de búsqueda
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: No se encontró ninguna medicina
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error del servidor
+ */
 medicineRouter.get('/medications', async(req, res) => {
     const { name, activeIngredient, nationalID } = req.query;
     try {
@@ -51,6 +148,34 @@ medicineRouter.get('/medications', async(req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /medications/{id}:
+ *   delete:
+ *     summary: Elimina una medicina por ID
+ *     tags: [Medicines]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Medicina eliminada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Medicine'
+ *       404:
+ *         description: Medicina no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error del servidor
+ */
 medicineRouter.delete('/medications/:id', async(req, res) => {
     try {
         const medicine = await Medicine.findByIdAndDelete(req.params.id);
@@ -63,6 +188,47 @@ medicineRouter.delete('/medications/:id', async(req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /medications:
+ *   delete:
+ *     summary: Elimina medicinas basadas en filtros (borrado múltiple)
+ *     tags: [Medicines]
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: activeIngredient
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: nationalID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Operación completada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Medicine'
+ *       400:
+ *         description: Falta criterio de búsqueda
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: No se encontraron elementos para borrar
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error del servidor
+ */
 medicineRouter.delete('/medications', async(req, res) => {
     const { name, activeIngredient, nationalID } = req.query;
     try {
@@ -87,6 +253,45 @@ medicineRouter.delete('/medications', async(req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /medications/{id}:
+ *   patch:
+ *     summary: Actualiza parcialmente una medicina
+ *     tags: [Medicines]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/MedicineUpdate'
+ *     responses:
+ *       200:
+ *         description: Medicina actualizada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Medicine'
+ *       400:
+ *         description: Campos no permitidos o error en validación
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Medicina no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error del servidor
+ */
 medicineRouter.patch('/medications/:id', async (req, res) => {
     if (!req.body) {
         res.status(400).send({
@@ -113,6 +318,46 @@ medicineRouter.patch('/medications/:id', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /medications/{id}:
+ *   put:
+ *     summary: Reemplaza/Actualiza una medicina completa
+ *     tags: [Medicines]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/MedicineCreate'
+ *     responses:
+ *       200:
+ *         description: Medicina reemplazada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Medicine'
+ *       400:
+ *         description: Faltan campos obligatorios
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Medicina no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error del servidor
+ */
 medicineRouter.put('/medications/:id', async (req, res) => {
     if (!req.body) {
         return res.status(400).send({
@@ -134,7 +379,6 @@ medicineRouter.put('/medications/:id', async (req, res) => {
         'contraindications'
     ];
     
-    // Comprobamos si falta alguno de los campos esenciales
     const missingFields = requiredFields.filter(field => !(field in req.body));
 
     if (missingFields.length > 0) {

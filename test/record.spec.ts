@@ -320,6 +320,18 @@ describe("Record Router", () => {
             await mongoose.connect("mongodb://localhost:27017/hospital-app");
          });
 
+         test("Debe dar error 500 si se apaga la base de datos", async () => {
+            await mongoose.connection.close();
+
+            const startDate = new Date(2026, 0, 1).toISOString();
+            const endDate = new Date(2026, 11, 31).toISOString();
+            await request(app)
+                .get(`/records/filter?startDate=${startDate}&endDate=${endDate}`)
+                .expect(500);
+
+            await mongoose.connect("mongodb://localhost:27017/hospital-app");
+         });
+
          test("Debe dar error si no se le introduce el rango de fechas", async () => {
             await request(app)
                 .get("/records/filter")
@@ -331,7 +343,7 @@ describe("Record Router", () => {
         test("Deberia eliminar la consulta con el id", async () => {
             await request(app)
                 .delete(`/records/${recordID}`)
-                .expect(204);
+                .expect(200);
         });
 
         test("Deberia dar error si el id no existe", async () => {
@@ -365,7 +377,7 @@ describe("Record Router", () => {
         test("Deberia eliminar las consultas ", async () => {
             await request(app)
                 .delete(`/records?id=${recordID}`)
-                .expect(204);
+                .expect(200);
         });
 
         test("Deberia dar error si la consulta no existe", async () => {
@@ -425,6 +437,7 @@ describe("Record Router", () => {
                 throw new Error('No se ha notificado correctamente la restricción de campos');
             }
         });
+
         test('Debe permitir actualizar campos simples sin tocar la lista de medicinas', async () => {
             const res = await request(app)
                 .patch(`/records/${recordID}`)

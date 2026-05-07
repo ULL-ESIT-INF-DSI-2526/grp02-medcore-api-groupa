@@ -5,7 +5,14 @@ import {Staff} from '../../models/staff.model.js';
 import {Medicine} from '../../models/medicine.model.js';
 import {MedicineList} from '../../interfaces/RecordDocumentInterface.js';
 
-
+/**
+ * Crea un nuevo registro médico en la base de datos.
+ * @param req - La solicitud HTTP que contiene los datos del nuevo registro médico en el cuerpo de la solicitud.
+ * @param res - La respuesta HTTP que se enviará al cliente después de procesar la solicitud. Contendrá el nuevo registro médico creado o un 
+ * mensaje de error si ocurre algún problema durante el proceso.
+ * @returns Devuelve un codigo de estado y un registro médico creado si la solicitud es exitosa, o un mensaje de error si ocurre algún problema 
+ * durante el proceso.
+ */
 export const createRecord = async (req: Request, res: Response) => {
   if (!req.body) {
     return res.status(400).send({
@@ -35,6 +42,11 @@ export const createRecord = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Función auxiliar para validar la lista de medicamentos asociados a un registro médico. Verifica que cada medicamento exista en la base de datos y 
+ * que haya suficiente stock disponible.
+ * @returns Devuelve la lista de medicamentos validada
+ */
 export const medicineValidator = async (medicines: MedicineList[]) => {
   for (const m of medicines) {
     const medicineFounded = await Medicine.findOne({ nationalID: m.medicine.toString() });

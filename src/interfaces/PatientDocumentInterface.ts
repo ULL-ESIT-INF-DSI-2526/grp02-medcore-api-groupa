@@ -9,11 +9,20 @@ export interface data {
     email: string; 
 }
 
-type Gender = 'male' | 'female' | 'other';
+/**
+ * Gender: Define los posibles géneros de un paciente, que pueden ser 'male', 'female' o 'other'.
+ */
+export type Gender = 'male' | 'female' | 'other';
 
-type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
+/**
+ * BloodType: Define los posibles tipos de sangre de un paciente, que pueden ser A+, A-, B+, B-, AB+, AB-, O+ u O-.
+ */
+export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 
-type PatientStatus = 'active' | 'deceased' | 'sick leave';
+/**
+ * PatientStatus: Define los posibles estados de un paciente, que pueden ser 'active', 'deceased' o 'sick leave'.
+ */
+export type PatientStatus = 'active' | 'deceased' | 'sick leave';
 
 
 /**

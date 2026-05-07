@@ -6,21 +6,18 @@ import {Medicine} from '../../models/medicine.model.js';
 import {MedicineList} from '../../interfaces/RecordDocumentInterface.js';
 import { medicineValidator } from './createRecord.js';
 
+/**
+ * Función para actualizar una consulta medica por su id de MongoDB.
+ * @param req - Request con el id de la consulta a actualizar en params y los campos a actualizar en body.
+ * @param res  - Response con el resultado de la operación.
+ * @returns Devuelve un codigo de estado y la consulta actualizada o un mensaje de error.
+ */
 export const updateRecord = async (req: Request, res: Response) => {
     try {
         const oldRecord = await Record.findById(req.params.id);
         if (!oldRecord) return res.status(404).send({error: 'Record not found'});
-        const allowedUpdates = [
-                                'patient',
-                                'responsable',
-                                'registerType',
-                                'startDate',
-                                'endDate',
-                                'motive',
-                                'diagnosis',
-                                'medicineList',
-                                'registerState'
-                            ];
+
+        const allowedUpdates = ['patient','responsable','registerType','startDate','endDate', 'motive', 'diagnosis','medicineList','registerState' ];
         const actualUpdates = Object.keys(req.body);
         const validUpdate = actualUpdates.every(u => allowedUpdates.includes(u));
         if (!validUpdate) return res.status(400).send({

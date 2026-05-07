@@ -1,10 +1,19 @@
 import {Document} from 'mongoose';
 
-type MedicineType = 'capsule' | 'compressed' | 'oral solution' | 'injectable solution' | 'ointment' | 'transdermal patch' | 'inhaler' | 'other';
+/**
+ * Tipos de medicamentos
+ */
+export type MedicineType = 'capsule' | 'compressed' | 'oral solution' | 'injectable solution' | 'ointment' | 'transdermal patch' | 'inhaler' | 'other';
 
-type MeasureUnit = 'mg' | 'ml' | 'g' | 'units';
+/**
+ * Unidades de medida
+ */
+export type MeasureUnit = 'mg' | 'ml' | 'g' | 'units';
 
-type IngestionMethod = 'oral' | 'intravenous' | 'intramuscular' | 'subcutaneous' | 'topical' |'inhalation';
+/**
+ * Métodos de ingestión
+ */
+export type IngestionMethod = 'oral' | 'intravenous' | 'intramuscular' | 'subcutaneous' | 'topical' |'inhalation';
 
 
 /**

@@ -9,7 +9,10 @@ export interface MedicineList {
   posology: string;
 }
 
-type RegisterState = 'Hospital Admission' | 'Outpatient Consultation';
+/**
+ * RegisterState: Define los posibles estados de un registro médico, que pueden ser 'Hospital Admission' o 'Outpatient Consultation'.
+ */
+export type RegisterState = 'Hospital Admission' | 'Outpatient Consultation';
 
 
 /**
